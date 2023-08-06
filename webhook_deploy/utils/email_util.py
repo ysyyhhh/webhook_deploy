@@ -4,13 +4,13 @@ from email.header import Header
 import subprocess
 import datetime
 from webhook_deploy.utils import log_util
-
+import webhook_deploy.config as config
 logger = log_util.logger
 def send_email(receivers:list,content:str,subject:str):
     # 第三方 SMTP 服务
-    mail_host="smtp.163.com"  #设置服务器
-    mail_user="ysyy_test@163.com"    #用户名
-    mail_pass="GFMJCQLPIACPBYQU"   #口令 
+    mail_host=config.MAIL_HOST  #设置服务器
+    mail_user=config.MAIL_USER    #用户名
+    mail_pass=config.MAIL_PASS
     
     
     sender = 'ysyy_test@163.com'
