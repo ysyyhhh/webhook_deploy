@@ -14,8 +14,18 @@ logger = log_util.logger
 import os
 app = FastAPI()
 
+def exec_run_test_command():
+    if config.RUN_TEST_SH_PATH == None:
+        # 没有测试脚本，直接返回通过
+        logger.info("no run test sh")
+        return 0
+    command = "sh " + config.RUN_TEST_SH_PATH
+    logger.info("exec " + command + " ...")
+    resp = os.system(command)
+    logger.info(resp)
+
+exec_run_test_command()
 def exec_command():
-    
     command = "sh " + config.DEPLOY_SH_PATH
     logger.info("exec " + command + " ...")
     resp = os.system(command)

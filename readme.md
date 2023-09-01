@@ -12,6 +12,14 @@
 
 
 ```shell
-docker build -t webhook_deploy .
-docker run -d --name webhook_deploy --env-file .env -p 8078:8078 webhook_deploy
+git clone https://github.com/ysyyhhh/webhook_deploy.git
+cd webhook_deploy
+// 创建并编辑.env文件
+cat > .env << EOF
+LOG_PATH=/root/logs
+DEPLOY_SH_PATH=/root/deploy.sh
+TEST_SH_PATH=/root/test.sh
+MAIL_HOST=smtp.163.com
+
+sh deploy.sh
 ```
