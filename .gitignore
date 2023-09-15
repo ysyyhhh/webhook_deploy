@@ -4,4 +4,4 @@
 *$py.class
 *.venv
 *log
-poetry.lock
+*poetry.lock
