@@ -13,7 +13,20 @@ logger = log_util.logger
 
 import os
 app = FastAPI()
+class Project:
+    name: str
+    deploy_sh_path: str
+    test_sh_path: str
+    
+    
+    def __init__(self,name,deploy_sh_path,test_sh_path):
+        self.name = name
+        self.deploy_sh_path = deploy_sh_path
+        self.test_sh_path = test_sh_path
 
+###
+# 测试 是否能运行
+##
 def exec_run_test_command():
     if config.RUN_TEST_SH_PATH == None:
         # 没有测试脚本，直接返回通过
@@ -25,30 +38,37 @@ def exec_run_test_command():
     logger.info(resp)
 
 exec_run_test_command()
-def exec_command():
-    command = "sh " + config.DEPLOY_SH_PATH
+
+
+def exec_command(project:Project):
+    # command = "sh " + config.DEPLOY_SH_PATH
+    command = "sh " + project.deploy_sh_path
     logger.info("exec " + command + " ...")
     resp = os.system(command)
     logger.info(resp)
 
-def exec_test_command(test_branch:str):
-    if config.TEST_SH_PATH == None:
+def exec_test_command(project:Project,test_branch:str):
+    
+    test_sh = project.test_sh_path
+    if test_sh == None:
         # 没有测试脚本，直接返回通过
         return 0
-    result = subprocess.run(["sh",config.TEST_SH_PATH,test_branch], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
+    result = subprocess.run(["sh",test_sh,test_branch], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
     return result
 
 
-def test_and_send_email(update_time:str,username:str,branch:str, email:str):
+def test_and_send_email(project:Project,update_time:str,username:str,branch:str, email:str,compare_url:str):
     # test
-    result = exec_test_command(branch)
+    result = exec_test_command(project,branch)
     
     if result == 1:
-        subject = "测试失败！" + username + "，您刚刚提交的分支{}测试失败，请检查并修复后再提交".format(branch)
-        content = username + "，您刚刚提交的分支{}在{}测试失败，请检查并修复后再提交".format(branch,update_time)
+        subject = "测试失败！" + username + "，您刚刚在{}项目中提交的分支{}测试失败，请检查并修复后再提交".format(project.name,branch)
+        content = username + "，您刚刚在{}项目中提交的分支{}在{}测试失败，请检查并修复后再提交".format(project.name,branch,update_time)
     else:
-        subject = "测试通过！" + username + "，您刚刚提交的分支{}测试成功，请提交pull request 并 通知相关人员进行代码review".format(branch)
-        content = username + "，您刚刚提交的分支{}在{}测试成功，请提交pull request 并 通知相关人员进行代码review".format(branch,update_time)
+        subject = "测试通过！" + username + "，您刚刚在{}项目中提交的分支{}测试成功，请提交pull request 并 通知相关人员进行代码review".format(project.name,branch)
+        content = username + "，您刚刚在{}项目中提交的分支{}在{}测试成功，请提交pull request 并 通知相关人员进行代码review".format(project.name,branch,update_time)
+    
+    content += "\n详情见 {}".format(compare_url)
     logger.info(email)
     logger.info(subject)
     logger.info(content)
@@ -57,6 +77,32 @@ def test_and_send_email(update_time:str,username:str,branch:str, email:str):
     email_util.send_email([email],content,subject)
     return result
 
+projects = []
+
+
+def get_project(name:str):
+    for p in projects:
+        if p.name == name:
+            return p
+    return None
+
+@app.on_event("startup")
+def load_project():
+    # 从projects.yaml中加载项目信息
+    global projects
+    projects = []
+    import yaml
+    with open("projects.yaml") as f:
+        tmp = yaml.load(f,Loader=yaml.FullLoader)
+        print(tmp)
+        for project in tmp:
+            p = Project(project["name"],project["deploy_sh_path"],project.get("test_sh_path"))
+            projects.append(p)
+    for p in projects:
+        logger.info(" ------------ ")
+        logger.info(p.name)
+        logger.info(p.deploy_sh_path)
+        logger.info(p.test_sh_path)
 
 @app.get("/")
 def read_root():
@@ -65,9 +111,15 @@ def read_root():
 @app.post("/webhook/event")
 async def receive_event(request: dict):
     logger.info(f"receive_event: {request}")
+    
+    project = get_project(request["repository"]["name"])
+    
     if "ref" in request:
         logger.info("enter ref")
         update_time = request["repository"]["updated_at"]
+        
+        compare_url = request["compare_url"]
+        
         if "refs/heads/master" == request["ref"]:
             logger.info("send to merger")
             username = request["commits"][0]["author"]["username"]
@@ -80,15 +132,17 @@ async def receive_event(request: dict):
         
         logger.info("update_time:{},username:{},email:{},branch:{}".format(update_time,username,email,branch))
         
-        result = test_and_send_email(update_time,username,branch,email)
+        result = test_and_send_email(project,update_time,username,branch,email,compare_url)
 
         logger.info("result:{}".format(result))
         if result == 0 and "refs/heads/master" == request["ref"]:
-            exec_command()
+            exec_command(project)
 
     return {"status": "ok"}
 
 
 
 # uvicorn.run(app, host="localhost", port=8077,access_log=True)
-# nohup sudo uvicorn fastapi_deploy:app --host '0.0.0.0' --port 8077 &
+# nohup sudo uvicorn webhook_deploy:app --host '0.0.0.0' --port 8077 &
+
+# poetry run uvicorn webhook_deploy.main:app --host '0.0.0.0' --port 8077

@@ -1,0 +1,4 @@
+- name: DigitalMap
+  deploy_sh_path: /home/centos/DigitalMap
+- name: DigitalMapAdmin
+  deploy_sh_path: /home/centos/DigitalMapAdmin

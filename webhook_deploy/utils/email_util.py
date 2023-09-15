@@ -17,7 +17,7 @@ def send_email(receivers:list,content:str,subject:str):
     # receivers 接收邮件，可设置为你的QQ邮箱或者其他邮箱
     
     message = MIMEText(content, 'plain', 'utf-8')
-    message['From'] = "ysyy <"+sender+">"
+    message['From'] = "git.mooctest <"+sender+">"
     message['To'] =  receivers[0]
     
     message['Subject'] = Header(subject, 'utf-8')

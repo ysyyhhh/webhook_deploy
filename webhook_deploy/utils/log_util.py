@@ -10,8 +10,12 @@ import webhook_deploy.config as config
 def reconfig_log():
     # -----------------------log-----------------------------------------
     # LOG_DIR = os.path.join(os.getcwd(), 'log')
-    LOG_DIR = config.LOG_PATH
-    LOG_DIR = os.path.join(LOG_DIR, time.strftime("%Y-%m-%d")+'.log')
+    if(config.LOG_PATH != None):
+        LOG_DIR = config.LOG_PATH
+        LOG_DIR = os.path.join(LOG_DIR, time.strftime("%Y-%m-%d")+'.log')
+    else:
+        LOG_DIR = os.path.join(os.getcwd(), 'log', time.strftime("%Y-%m-%d")+'.log')
+       
     LOG_FORMAT = '<level>{level: <8}</level>  <green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> - <cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>'
 
     def format_record(record: dict) -> str:

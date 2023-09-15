@@ -12,6 +12,7 @@
 
 
 ```shell
+rm -rf webhook_deploy
 git clone https://github.com/ysyyhhh/webhook_deploy.git
 cd webhook_deploy
 // 创建并编辑.env文件
@@ -20,6 +21,7 @@ LOG_PATH=/root/logs
 DEPLOY_SH_PATH=/root/deploy.sh
 TEST_SH_PATH=/root/test.sh
 MAIL_HOST=smtp.163.com
+RUN_TEST_SH_PATH=/root/run_test.sh
 
 sh deploy.sh
 ```
