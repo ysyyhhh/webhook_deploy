@@ -32,6 +32,13 @@ def send_email(receivers:list,content:str,subject:str):
         logger.info(e)
         logger.info("Error: 无法发送邮件")
 
+def test_send_email():
+    receivers = ['757578166@qq.com']
+    content = '''测试邮件'''
+    subject = 'wenbook部署时发送的邮件测试'
+    send_email(receivers,content,subject)
+
+test_send_email()
 if __name__ == '__main__':
     email = "757578166@qq.com"
     branch = "rongrunxiang/click_active_cal"
