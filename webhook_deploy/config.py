@@ -1,5 +1,6 @@
 import os
-
+from dotenv import load_dotenv
+load_dotenv(verbose=True)
 LOG_PATH = os.getenv("LOG_PATH")
 
 MAIL_HOST = os.getenv("MAIL_HOST")
