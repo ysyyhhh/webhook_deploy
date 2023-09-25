@@ -33,4 +33,7 @@ EOF
 
 
 poetry run uvicorn webhook_deploy.main:app --host 0.0.0.0 --port 8078
+
+然后在webhook中配置http://ip:8078//webhook/event
+
 ```
