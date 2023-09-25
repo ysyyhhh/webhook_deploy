@@ -24,7 +24,7 @@ EOF
 // test_sh_path是可选的，如果没有则不会执行测试脚本。
 cat > projects.yaml << EOF
 - name: DigitalMap
-  deploy_sh_path: /home/centos/DigitalMap
+  deploy_sh_path: /home/centos/DigitalMap.sh
   test_sh_path: /home/centos/DigitalMap/test.sh
 - name: DigitalMapAdmin
   deploy_sh_path: /home/centos/DigitalMapAdmin
