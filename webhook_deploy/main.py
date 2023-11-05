@@ -120,11 +120,14 @@ async def receive_event(request: dict):
         
         compare_url = request["compare_url"]
         
-        if "refs/heads/master" == request["ref"]:
-            logger.info("send to merger")
+        is_master = False
+        if "refs/heads/master" == request["ref"] or "refs/heads/main" == request["ref"]:
+            logger.info("is main or master branch, send to merger")
+            is_master = True
             username = request["commits"][0]["author"]["username"]
             email = request["commits"][0]["author"]["email"]
         else:
+            logger.info("is not main or master branch, send to merger")
             username = request["pusher"]["username"]
             email = request["pusher"]["email"]
         
@@ -135,7 +138,7 @@ async def receive_event(request: dict):
         result = test_and_send_email(project,update_time,username,branch,email,compare_url)
 
         logger.info("result:{}".format(result))
-        if result == 0 and "refs/heads/master" == request["ref"]:
+        if result == 0 and is_master:
             exec_command(project)
 
     return {"status": "ok"}
