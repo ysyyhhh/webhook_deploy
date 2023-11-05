@@ -5,3 +5,4 @@
 *.venv
 *log
 *poetry.lock
+projects.yaml
