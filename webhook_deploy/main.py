@@ -46,6 +46,7 @@ def exec_command(project:Project):
     logger.info("exec " + command + " ...")
     resp = os.system(command)
     logger.info(resp)
+    return resp
 
 def exec_test_command(project:Project,test_branch:str):
     
@@ -56,6 +57,25 @@ def exec_test_command(project:Project,test_branch:str):
     result = subprocess.run(["sh",test_sh,test_branch], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode
     return result
 
+def deploy_and_send_email(project:Project,update_time:str,username:str,branch:str, email:str,compare_url:str):
+    # deploy
+    result = exec_command(project)
+    if result == 0:
+        subject = "{} 部署成功！".format(project.name) + username + "，您刚刚在{}项目中提交的分支{}部署成功"
+        content = username + "，您刚刚在{}项目中提交的分支{}在{}部署成功".format(project.name,branch,update_time)
+    else:
+        subject = "{} 部署失败！".format(project.name) + username + "，您刚刚在{}项目中提交的分支{}部署失败，请检查并修复后再提交"
+        content = username + "，您刚刚在{}项目中提交的分支{}在{}部署失败，请检查并修复后再提交".format(project.name,branch,update_time)
+    
+    content += "\n详情见 {}".format(compare_url)
+    
+    # send email
+    logger.info(result)
+    logger.info(email)
+    logger.info(subject)
+    logger.info(content)
+    email_util.send_email([email],content,subject)
+    return result
 
 def test_and_send_email(project:Project,update_time:str,username:str,branch:str, email:str,compare_url:str):
     # test
@@ -139,7 +159,7 @@ async def receive_event(request: dict):
 
         logger.info("result:{}".format(result))
         if result == 0 and is_master:
-            exec_command(project)
+            deploy_and_send_email(project,update_time,username,branch,email,compare_url)
 
     return {"status": "ok"}
 
