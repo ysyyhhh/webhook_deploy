@@ -61,10 +61,10 @@ def deploy_and_send_email(project:Project,update_time:str,username:str,branch:st
     # deploy
     result = exec_command(project)
     if result == 0:
-        subject = "{} 部署成功！".format(project.name) + username + "，您刚刚在{}项目中提交的分支{}部署成功"
+        subject = "{} 部署成功！".format(project.name) + username + "，您刚刚在{}项目中提交的分支{}部署成功".format(project.name,branch)
         content = username + "，您刚刚在{}项目中提交的分支{}在{}部署成功".format(project.name,branch,update_time)
     else:
-        subject = "{} 部署失败！".format(project.name) + username + "，您刚刚在{}项目中提交的分支{}部署失败，请检查并修复后再提交"
+        subject = "{} 部署失败！".format(project.name) + username + "，您刚刚在{}项目中提交的分支{}部署失败，请检查并修复后再提交".format(project.name,branch)
         content = username + "，您刚刚在{}项目中提交的分支{}在{}部署失败，请检查并修复后再提交".format(project.name,branch,update_time)
     
     content += "\n详情见 {}".format(compare_url)
